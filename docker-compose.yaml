@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  cop:
+    image: tokend/traefik-cop:1.1.0
+    depends_on:
+      - traefik
+    restart: unless-stopped
+    environment:
+      - KV_VIPER_FILE=/etc/cop/config.yaml
+    volumes:
+      - ./configs/cop.yaml:/etc/cop/config.yaml
+    entrypoint: sh -c "traefik-cop run"
+  traefik:
+    image: traefik:v3.0
+    depends_on:
+      - upstream
+    restart: unless-stopped
+    volumes:
+      - ./configs/traefik.yaml:/traefik.yaml
+    ports:
+      - "80:80"
+      - "8081:8080"
+  upstream:
+    image: nginx:1.23.2
+    restart: unless-stopped
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8000:80"
